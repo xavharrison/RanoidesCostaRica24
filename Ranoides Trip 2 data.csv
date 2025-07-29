@@ -1,0 +1,15 @@
+﻿Frog Number,Sex,Age,Weight pre,Weight post,SVL (cm),Frequency (MHz),Substrate ,Righting pre,Righting post,Swab ID,Notes
+1,F,Adult,15.1,No recapture,50,150.010,Rock,Yes,,1FR,
+2,F,Adult,7.1,8.5,40,150.043,Rock,Yes,Yes,2FR,
+3,F,Adult,15.1,15,53,150.72,Rock,Yes,Yes,3FR,Carrying 4 eggs
+4,M,Adult,6.5,7,40,150.163,Rock,Yes,Yes,4MR,
+5,M,Adult,6,No recapture,39,150.284,Sediment ,Yes,,5MS,
+6,M,Adult,6.4,6,38,150.309,Rock,Yes,Yes,6MR,
+7,F,Sub-adult,5.5,6.5,39,150.444,Rock,Yes,Yes,7FR,Possess scratch on leg
+8,F,Adult,11.5,No recapture,47.5,150.565,Rock,Yes,,8FR,
+9,F,Adult,6.8,6.05,43,150.629,Rock,Yes,Very hoppy,9FR,Didn’t do right test but very hoppy
+10,M,Adult,4.9,5,38,150.686,Rock,Yes,Yes,10MR,
+11,F,Adult,11.3,No recapture,46.2,150.710,Rock,Yes,,11FR,Tag battery died 12/3
+12,F,Adult,22.6,No recapture,60,150.845,Water,Yes,,12FW,Predicted to be consumed
+13,M,Adult,6,7.75,42,150.87,Sediment ,Yes,Yes,13MS,
+14,F,Adult,7,7,41,150.91,Rock,Yes,Yes,14FR,
