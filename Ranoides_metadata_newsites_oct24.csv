@@ -1,78 +1,78 @@
-Plate,Well,Sample,Library,Protocol,PCR,Barcode Name,Barcode Sequence,Conc,Flags,class,SV (mm),Site name,GPS code,Lat,Long,M.A.S.L. (GPS),Date,Time,Swabbed,Recaptur/ New,KH.note,pH_mean,pH_sd,pH_n,pH.FP_mean,pH.FP_sd,pH.FP_n,Site,Withinsite.options,Note.on.withinsite.split,WS.pH_mean,WS.pH_sd,WS.pH_n,WS.pH.FP_mean,WS.pH.FP_sd,WS.pH.FP_n,PIT tag code,Elastomer?,Colour left,Colour right,Notes,People on trip
-1,A1,RP01,RP01-l1,Other,none,UDP0193,TCTCATGATA-AACACGTGGA,,,,41,Brazo del potero grande,CI01,10.88052101,-85.69251901,372.668121,04/01/2022,19:05,Yes,N,,7.87,0.29,12,8.10,0.19,4,BdPG-B,Split.site_Between.upper.and.lower.waterfalls,based.on.field.note.site.ecology,7.88,0.21,6,7.98,NA,1,,yes,orange,orange,From Cerro el Ingles ,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,B1,RP02,RP02-l1,Other,none,UDP0194,CGAGGCCAAG-GTGTTACCGG,,,,35,Brazo del potero grande,CI01,10.88052101,-85.69251901,372.668121,04/01/2022,19:05,Yes,N,,7.87,0.29,12,8.10,0.19,4,BdPG-B,Split.site_Between.upper.and.lower.waterfalls,based.on.field.note.site.ecology,7.88,0.21,6,7.98,NA,1,,yes,red,red,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,C1,RP03,RP03-l1,Other,none,UDP0195,TTCACGAGAC-AGATTGTTAC,,,,26.2,Brazo del potero grande,CI01,10.88052101,-85.69251901,372.668121,04/01/2022,19:05,Yes,N,,7.87,0.29,12,8.10,0.19,4,BdPG-B,Split.site_Between.upper.and.lower.waterfalls,based.on.field.note.site.ecology,7.88,0.21,6,7.98,NA,1,,yes,red,orange,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,D1,RP04,RP04-l1,Other,none,UDP0196,GCGTGGATGG-TTGACCAATG,,,,20,Brazo del potero grande,CI02,10.89880102,-85.75617696,85.413101,04/01/2022,20:01,Yes,N,,7.87,0.29,12,8.10,0.19,4,BdPG-B,Split.site_Between.upper.and.lower.waterfalls,based.on.field.note.site.ecology,7.88,0.21,6,7.98,NA,1,,yes,,,too small to mark,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,E1,RP05,RP05-l1,Other,none,UDP0197,TCCTGGTTGT-CTGACCGGCA,,,,28.3,Brazo del potero grande,CI03,10.87838002,-85.69412397,333.692932,04/01/2022,20:32,Yes,N,,7.87,0.29,12,8.10,0.19,4,BdPG-A,Split.site_After.lower.waterfall,based.on.field.note.site.ecology,7.98,0.27,5,8.14,0.21,3,,yes,orange,red,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,F1,RP06,RP06-l1,Other,none,UDP0198,TAATTCTGCT-TCTCATCAAT,,,female,39,Brazo del potero grande,CI03,10.87838002,-85.69412397,333.692932,04/01/2022,20:32,Yes,N,,7.87,0.29,12,8.10,0.19,4,BdPG-A,Split.site_After.lower.waterfall,based.on.field.note.site.ecology,7.98,0.27,5,8.14,0.21,3,3D6.15340D80C8,No,,,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,G1,RP07,RP07-l1,Other,none,UDP0199,CGCACGACTG-GGACCAACAG,,,,19.5,Brazo del potero grande,CI04,10.87842101,-85.69422497,339.067871,04/01/2022,23:30,Yes,N,think.these.are.2030,7.87,0.29,12,8.10,0.19,4,BdPG-A,Split.site_After.lower.waterfall,based.on.field.note.site.ecology,7.98,0.27,5,8.14,0.21,3,,yes,,,too small to mark,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,H1,RP08,RP08-l1,Other,none,UDP0200,GAGGTTAGAC-AATGTATTGC,,,Female,57,Brazo del potero grande,CI04,10.87842101,-85.69422497,339.067871,04/01/2022,23:30,Yes,N,think.these.are.2030,7.87,0.29,12,8.10,0.19,4,BdPG-A,Split.site_After.lower.waterfall,based.on.field.note.site.ecology,7.98,0.27,5,8.14,0.21,3,3D6.15340D80C1,No,,,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,A2,RP09,RP09-l1,Other,none,UDP0201,AACCGAGTTC-GATCTCTGGA,,,,32,Brazo del potero grande,CI04,10.87842101,-85.69422497,339.067871,04/01/2022,23:30,Yes,N,think.these.are.2030,7.87,0.29,12,8.10,0.19,4,BdPG-A,Split.site_After.lower.waterfall,based.on.field.note.site.ecology,7.98,0.27,5,8.14,0.21,3,,yes,yellow,yellow,3 more including 2 large ones,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,B2,RP10,RP10-l1,Other,none,UDP0202,TGTGATAACT-CAGGCGCCAT,,,,32,Pedregal,PE01,10.89984499,-85.74123899,62.88166,05/01/2022,18:32,,N,,8.25,0.15,10,8.34,0.04,7,P-A,Split.slow.overgrown.stream,based.on.fieldnote.site.ecology.but.no.photo.swabbing.to.be.sure.of.batch.timings,8.36,0.02,3,8.36,0.02,3,,yes,blue,blue,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,C2,RP11,RP11-l1,Other,none,UDP0203,AGTATGCTAC-TTAATAGACC,,,,29,Pedregal,PE02,10.89966402,-85.74113798,65.188705,05/01/2022,,,,,8.25,0.15,10,8.34,0.04,7,P-A,Split.slow.overgrown.stream,based.on.fieldnote.site.ecology.but.no.photo.swabbing.to.be.sure.of.batch.timings,8.36,0.02,3,8.36,0.02,3,,yes,blue,yellow,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,D2,RP12,RP12-l1,Other,none,UDP0204,GTAACTGAAG-GGAGTCGCGA,,,female,48,Pedregal,PE03,10.89963804,-85.74113203,69.815262,05/01/2022,,,,,8.25,0.15,10,8.34,0.04,7,P-A,Split.slow.overgrown.stream,based.on.fieldnote.site.ecology.but.no.photo.swabbing.to.be.sure.of.batch.timings,8.36,0.02,3,8.36,0.02,3,3D6.15340D80B0,no,,,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,E2,RP13,RP13-l1,Other,none,UDP0205,TCCTCGGACT-AACGCCAGAG,,,,31.5,Pedregal,PE05,10.89932498,-85.74095098,72.191635,05/01/2022,,,,,8.25,0.15,10,8.34,0.04,7,P-A,Split.slow.overgrown.stream,based.on.fieldnote.site.ecology.but.no.photo.swabbing.to.be.sure.of.batch.timings,8.36,0.02,3,8.36,0.02,3,,yes,yellow,blue,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,F2,RP14,RP14-l1,Other,none,UDP0206,CTGGAACTGT-CGTAATTAAC,,,,40.5,Pedregal,PE05,10.89932498,-85.74095098,72.191635,05/01/2022,,,,,8.25,0.15,10,8.34,0.04,7,P-A,Split.slow.overgrown.stream,based.on.fieldnote.site.ecology.but.no.photo.swabbing.to.be.sure.of.batch.timings,8.36,0.02,3,8.36,0.02,3,,yes,red,yellow,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,G2,RP15,RP15-l1,Other,none,UDP0207,GAATATGCGG-ACGAGACTGA,,,,21,Pedregal,PE05,10.89932498,-85.74095098,72.191635,05/01/2022,,,,,8.25,0.15,10,8.34,0.04,7,P-A,Split.slow.overgrown.stream,based.on.fieldnote.site.ecology.but.no.photo.swabbing.to.be.sure.of.batch.timings,8.36,0.02,3,8.36,0.02,3,,no,,,too small to mark,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,H2,RP16,RP16-l1,Other,none,UDP0208,GATCGGATAA-GTATCGGCCG,,,female,58,Pedregal,PE06,,,,05/01/2022,23:52,,,think.this.is.c.19:30_just_before_we_crossed_waterfall_and_found_no_more_frogs,8.25,0.15,10,8.34,0.04,7,P-B,Split.clear.stream,based.on.fieldnote.site.ecology.but.no.photo.swabbing.to.be.sure.of.batch.timings,8.20,0.16,7,8.32,0.04,4,3D6.15340D80BB,no,,,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,A3,RP17,RP17-l1,Other,none,UDP0209,GCTAGACTAT-AATACGACAT,,,,28.5,Pedregal,PE05,10.89932498,-85.74095098,72.191635,05/01/2022,,,,,8.25,0.15,10,8.34,0.04,7,P-B,Split.clear.stream,based.on.fieldnote.site.ecology.but.no.photo.swabbing.to.be.sure.of.batch.timings,8.20,0.16,7,8.32,0.04,4,,yes,yellow,red,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,B3,RP18,RP18-l1,Other,none,UDP0210,AGCTACTATA-GTTATATGGC,,,,38,Pedregal,PE07,,,,05/01/2022,,,,,8.25,0.15,10,8.34,0.04,7,P-B,Split.clear.stream,based.on.fieldnote.site.ecology.but.no.photo.swabbing.to.be.sure.of.batch.timings,8.20,0.16,7,8.32,0.04,4,,yes,blue,red,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,C3,RP19,RP19-l1,Other,none,UDP0211,CCACCGGAGT-GCCTGCCATG,,,,30,Pedregal,PE08,10.90114703,-85.744952,65.8647,05/01/2022,,,,,8.25,0.15,10,8.34,0.04,7,P-B,Split.clear.stream,based.on.fieldnote.site.ecology.but.no.photo.swabbing.to.be.sure.of.batch.timings,8.20,0.16,7,8.32,0.04,4,,yes,red ,blue,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,D3,RP20,RP20-l1,Other,none,UDP0212,CTTACCGCAC-TAAGACCTAT,,,,34,Murcielago,MU01,10.88979199,-85.694143,371.394653,07/01/2022,,,,,8.20,0.13,12,8.16,0.09,10,M-A,Steep.stream,time.split.based.on.altitude.drop.off_notes.indicate.gap.in.frog.sightings.midseries.to.perhaps.support,8.22,0.17,6,8.12,0.08,4,,,green,green,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,E3,RP30,RP30-l1,Other,none,UDP0213,TTAGGATATC-TATACCATGG,,,,30,Murcielago,MU08,10.89003397,-85.69561796,357.21283,07/01/2022,,,,,8.20,0.13,12,8.16,0.09,10,M-A,Steep.stream,time.split.based.on.altitude.drop.off_notes.indicate.gap.in.frog.sightings.midseries.to.perhaps.support,8.22,0.17,6,8.12,0.08,4,3D6.1534oD80C3,,,,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,F3,RP29,RP29-l1,Other,none,UDP0214,TTATACGCGA-GCCGTCTGTT,,,,59,Murcielago,MU07,10.89009197,-85.696042,352.443726,07/01/2022,19:53,,,Assuming.time.marks.end.of.batch1.for.day,8.20,0.13,12,8.16,0.09,10,M-A,Steep.stream,time.split.based.on.altitude.drop.off_notes.indicate.gap.in.frog.sightings.midseries.to.perhaps.support,8.22,0.17,6,8.12,0.08,4,3D6.15340D808E,,,,weight  27 gr,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,G3,RP28,RP28-l1,Other,none,UDP0215,CGCTTAGAAT-CAGAGTGATA,,,,25,Murcielago,MUO6,10.89021703,-85.69606899,358.125854,07/01/2022,,,,,8.20,0.13,12,8.16,0.09,10,M-B,More.continuous.stream,time.split.based.on.altitude.drop.off_notes.indicate.gap.in.frog.sightings.midseries.to.perhaps.support,8.18,0.10,6,8.18,0.10,6,,,orange,blue,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,H3,RP27,RP27-l1,Other,none,UDP0216,CCGAAGCGCT-TGCTAACTAT,,,,31,Murcielago,MUO6,10.89021703,-85.69606899,358.125854,07/01/2022,,,,,8.20,0.13,12,8.16,0.09,10,M-B,More.continuous.stream,time.split.based.on.altitude.drop.off_notes.indicate.gap.in.frog.sightings.midseries.to.perhaps.support,8.18,0.10,6,8.18,0.10,6,,,yellow,green,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,A4,RP26,RP26-l1,Other,none,UDP0217,CACTATCAAC-TCAGTTAATG,,,,28,Murcielago,MUO5,10.89030697,-85.69584796,352.092407,07/01/2022,,,,,8.20,0.13,12,8.16,0.09,10,M-B,More.continuous.stream,time.split.based.on.altitude.drop.off_notes.indicate.gap.in.frog.sightings.midseries.to.perhaps.support,8.18,0.10,6,8.18,0.10,6,,,green,yellow,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,B4,RP25,RP25-l1,Other,none,UDP0218,TTGCTCTATT-GTGACCTTGA,,,,37,Murcielago,MUO5,10.89030697,-85.69584796,352.092407,07/01/2022,,,,,8.20,0.13,12,8.16,0.09,10,M-B,More.continuous.stream,time.split.based.on.altitude.drop.off_notes.indicate.gap.in.frog.sightings.midseries.to.perhaps.support,8.18,0.10,6,8.18,0.10,6,,,yellow,orange,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,C4,RP24,RP24-l1,Other,none,UDP0219,TTACAGTTAG-ACATGCATAT,,,,29,Murcielago,MU04,10.89010304,-85.69553196,346.443787,07/01/2022,,,,,8.20,0.13,12,8.16,0.09,10,M-B,More.continuous.stream,time.split.based.on.altitude.drop.off_notes.indicate.gap.in.frog.sightings.midseries.to.perhaps.support,8.18,0.10,6,8.18,0.10,6,,,orange,yellow,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,D4,RP23,RP23-l1,Other,none,UDP0220,CTAAGTACGC-AACATACCTA,,,,35,Murcielago,MU04,10.89010304,-85.69553196,346.443787,07/01/2022,,,,,8.20,0.13,12,8.16,0.09,10,M-B,More.continuous.stream,time.split.based.on.altitude.drop.off_notes.indicate.gap.in.frog.sightings.midseries.to.perhaps.support,8.18,0.10,6,8.18,0.10,6,,,orange,green,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,E4,RP22,RP22-l1,Other,none,UDP0221,TAGTTCGGTA-CCATGTGTAG,,,,32,Murcielago,MU03,10.890197,-85.69504003,353.881714,07/01/2022,,,,,8.20,0.13,12,8.16,0.09,10,M-B,More.continuous.stream,time.split.based.on.altitude.drop.off_notes.indicate.gap.in.frog.sightings.midseries.to.perhaps.support,8.18,0.10,6,8.18,0.10,6,,,green,orange,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,F4,RP21,RP21-l1,Other,none,UDP0222,CTATTACTAC-GAGTCTCTCC,,,,39,Murcielago,MU02,10.889808,-85.69441902,362.236084,07/01/2022,22:15,,,,8.20,0.13,12,8.16,0.09,10,M-B,More.continuous.stream,time.split.based.on.altitude.drop.off_notes.indicate.gap.in.frog.sightings.midseries.to.perhaps.support,8.18,0.10,6,8.18,0.10,6,3D6.15340D807D,no,,,,"Harrison, Herborn, North, Wilson, Puschendorf, Siegfried"
-1,G4,RP31,RP31-l1,Other,none,UDP0223,TAGCATAACC-GCTATGCGCA,,,Juvenile,23,Brazo del potero grande,CI05,10.8924545,-85.726515,74.86779785,07/04/2022,,,,,7.97,0.06,4,7.98,0.05,3,BdPG-B,early.eve.upstream.steep,1h.time.sampling.gap.suggests.distance,8.01,0.03,2,8.01,0.03,2,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,H4,RP32,RP32-l1,Other,none,UDP0224,ACTCTATTGT-ATCGCATATG,,,Female,60,Brazo del potero grande,CI07,10.89328422,-85.72691289,71.74353027,07/04/2022,,,,,7.97,0.06,4,7.98,0.05,3,BdPG-B,early.eve.upstream.steep,1h.time.sampling.gap.suggests.distance,8.01,0.03,2,8.01,0.03,2,,,,,"Female, gravid","Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,A5,RP33,RP33-l1,Other,none,UDP0225,TAGTGGAAGC-AGTACCTATA,,,Male,47,Brazo del potero grande,CI08,10.89363651,-85.72718689,71.50317383,07/04/2022,,,,,7.97,0.06,4,7.98,0.05,3,BdPG-A,later.eve.downstream.more.continuous.river,1h.time.sampling.gap.suggests.distance,7.92,0.01,2,7.93,NA,1,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,B5,RP34,RP34-l1,Other,none,UDP0226,CGCCATATCT-GACCGGAGAT,,,,,Brazo del potero grande,CI09,10.89401454,-85.72742578,69.82092285,07/04/2022,,,,,7.97,0.06,4,7.98,0.05,3,BdPG-A,later.eve.downstream.more.continuous.river,1h.time.sampling.gap.suggests.distance,7.92,0.01,2,7.93,NA,1,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,C5,RP35,RP35-l1,Other,none,UDP0227,GCTTCATATT-CGTTCAGCCT,,,Female,59,Pedregal,PE09,,,,08/04/2022,19:30,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,Only.use.date.matched.data,All.together_by.agar.sites.that.were.all.beyond.the.overgrown.stream,8.03,0.21,5,8.16,0.09,3,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,D5,RP36,RP36-l1,Other,none,UDP0228,ACTAGCGCTA-TTACTTCCTC,,,Female,32,Pedregal,PE10,,,,08/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,Only.use.date.matched.data,All.together_by.agar.sites.that.were.all.beyond.the.overgrown.stream,8.03,0.21,5,8.16,0.09,3,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,E5,RP37,RP37-l1,Other,none,UDP0229,GCTCTTAACT-CACGTCCACC,,,Female,33,Pedregal,PE11,,,,08/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,Only.use.date.matched.data,All.together_by.agar.sites.that.were.all.beyond.the.overgrown.stream,8.03,0.21,5,8.16,0.09,3,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,F5,RP38,RP38-l1,Other,none,UDP0230,GTGGTATCTG-GCTACTATCT,,,Female,28,Pedregal,PE11,,,,08/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,Only.use.date.matched.data,All.together_by.agar.sites.that.were.all.beyond.the.overgrown.stream,8.03,0.21,5,8.16,0.09,3,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,G5,RP39,RP39-l1,Other,none,UDP0231,TGACGGCCGT-AGTCAACCAT,,,Juvenile,20,Pedregal,PE12,,,,10/04/2022,19:22,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,Only.use.date.matched.data,All.within.10min.of.eachother_by.agar.sites.that.were.beyond.the.overgrown.stream,7.95,0.15,5,7.95,0.15,5,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,H5,RP40,RP40-l1,Other,none,UDP0232,CAGTAATTAC-CGAGGCGGTA,,,Juvenile,20,Pedregal,PE13,,,,10/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,Only.use.date.matched.data,All.within.10min.of.eachother_by.agar.sites.that.were.beyond.the.overgrown.stream,7.95,0.15,5,7.95,0.15,5,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,A6,RP41,RP41-l1,Other,none,UDP0233,TACAAGACTT-CAGGTGTTCA,,,Female,39,Pedregal,PE14,,,,10/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,Only.use.date.matched.data,All.within.10min.of.eachother_by.agar.sites.that.were.beyond.the.overgrown.stream,7.95,0.15,5,7.95,0.15,5,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,B6,RP43,RP43-l1,Other,none,UDP0234,CTGTGGTGAC-GACAGACAGG,,,Juvenile,21,Pedregal,PE14,,,,10/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,Only.use.date.matched.data,All.within.10min.of.eachother_by.agar.sites.that.were.beyond.the.overgrown.stream,7.95,0.15,5,7.95,0.15,5,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,C6,RP44,RP44-l1,Other,none,UDP0235,CTCCACTAAT-TGTACTTGTT,,,Juvenile,29,Pedregal,PE14,,,,10/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,Only.use.date.matched.data,All.within.10min.of.eachother_by.agar.sites.that.were.beyond.the.overgrown.stream,7.95,0.15,5,7.95,0.15,5,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,D6,RP45,RP45-l1,Other,none,UDP0236,ATAGTTAGCA-CTCTAAGTAG,,,Female,33,Pedregal,PE14,,,,11/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,No.data.on.date,By.agar.sites.that.were.all.beyond.the.overgrown.stream_no.times.per.swab.to.further.split.into.below.and.above.waterfall,NA,NA,NA,NA,NA,NA,,,,,"Recapture, this is PE37É","Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,E6,RP46,RP46-l1,Other,none,UDP0237,ATAGGTCTTA-GTCACCACAG,,,Female,55,Pedregal,PE15,,,,11/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,No.data.on.date,By.agar.sites.that.were.all.beyond.the.overgrown.stream_no.times.per.swab.to.further.split.into.below.and.above.waterfall,NA,NA,NA,NA,NA,NA,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,F6,RP47,RP47-l1,Other,none,UDP0238,TTCTTAACCA-TCTACATACC,,,Male,42,Pedregal,PE15,,,,11/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,No.data.on.date,By.agar.sites.that.were.all.beyond.the.overgrown.stream_no.times.per.swab.to.further.split.into.below.and.above.waterfall,NA,NA,NA,NA,NA,NA,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,G6,RP48,RP48-l1,Other,none,UDP0239,AAGGAAGAGT-CACGTTAGGC,,,Male,40,Pedregal,PE15,,,,11/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,No.data.on.date,By.agar.sites.that.were.all.beyond.the.overgrown.stream_no.times.per.swab.to.further.split.into.below.and.above.waterfall,NA,NA,NA,NA,NA,NA,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,H6,RP42,RP42-l1,Other,none,UDP0240,GGAAGGAGAC-TGGTGAGTCT,,,Female,43,Pedregal,PE14,,,,10/04/2022,,,,combined.pedrogal.samples.8th.and.10th,7.99,0.18,10,8.03,0.17,8,P-B,Only.use.date.matched.data,Out.of.sequence.check.date?_All.10th.frogs.within.10min.of.eachother_by.agar.sites.that.were.beyond.the.overgrown.stream,7.95,0.15,5,7.95,0.15,5,,,,,,"Harrison, Herborn, Wilson, Fernandez, Puschendorf"
-1,A7,10MR,10MR-l1,Other,none,UDP0241,TGAACGCGGA-CTTCGAAGGA,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,B7,9FR_2,9FR_2-l1,Other,none,UDP0242,CCTGCAACCT-GTAGAGTCAG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,C7,8FR,8FR-l1,Other,none,UDP0243,TTCATGGTTC-GACATTGTCA,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,D7,7FR,7FR-l1,Other,none,UDP0244,ATCCTCTCAA-TCCGCAAGGC,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,E7,6MR,6MR-l1,Other,none,UDP0245,CACTAGACCA-ACTGCCTTAT,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,F7,5MS,5MS-l1,Other,none,UDP0246,ATTATCCACT-TACGCACGTA,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,G7,4MR,4MR-l1,Other,none,UDP0247,ATGGCGTGCC-CGCTTGAAGT,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,H7,3FR,3FR-l1,Other,none,UDP0248,TCCAGAGATC-CTGCACTTCA,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,A8,2FR,2FR-l1,Other,none,UDP0249,ATGTCCAGCA-CAGCGGACAA,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,B8,1FR,1FR-l1,Other,none,UDP0250,CAACGTTCGG-GGATCCGCAT,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,C8,11FR,11FR-l1,Other,none,UDP0251,GCGTATTAAT-TGCGGTGTTG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,D8,12FW,12FW-l1,Other,none,UDP0252V2,CCGAATCTGG-ATGAATCAAG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,E8,13MS,13MS-l1,Other,none,UDP0253,TCTCAATACC-GACGTTCGCG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,F8,14FR,14FR-l1,Other,none,UDP0254,AAGCATCTTG-CATTCAACAA,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,G8,9FR,9FR-l1,Other,none,UDP0255,TCAGTCTCGT-CACGGATTAT,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,H8,4MR_2,4MR_2-l1,Other,none,UDP0256,TGCAAGATAA-TTGAGGACGG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,A9,13MS_2,13MS_2-l1,Other,none,UDP0257,GTAACAATCT-CTCTGTATAC,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,B9,7_2,7_2-l1,Other,none,UDP0258V2,CCATGGTATA-TCTCGCGGAG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,C9,3_2,3_2-l1,Other,none,UDP0259,TCATACCGTT-GGTAACGCAG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,D9,14_2,14_2-l1,Other,none,UDP0260,GGCGCCATTG-ACCGCGCAAT,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,E9,10_2,10_2-l1,Other,none,UDP0261,AGCGAATTAG-AGCCGGAACA,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,F9,6_2,6_2-l1,Other,none,UDP0262,TTAGACCATG-TCCTAGGAAG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,G9,2_2,2_2-l1,Other,none,UDP0263,CACACAGTAT-TTGAGCCTAA,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,H9,MOCK1,MOCK1-l1,Other,none,UDP0264,TCTTGTCGGC-CCACCTGTGT,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,A10,MOCK2,MOCK2-l1,Other,none,UDP0265,TACCGCCTCG-CCTCGCAACC,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,B10,NEGATIVE1,NEGATIVE1-l1,Other,none,UDP0266,CTGTTATATC-GTATAGCTGT,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,C10,NEGATIVE2,NEGATIVE2-l1,Other,none,UDP0267,TAACCGGCGA-GCTACATTAG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,D10,NTC,NTC-l1,Other,none,UDP0268,AAGAGAGTCT-TACGAATCTT,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-1,E10,Mock,Mock-l1,Other,none,UDP0269,GTAGGCGAGC-TAGGAGCGCA,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Sample,SV (mm),Site name,Date,pH_mean,pH_sd,pH_n,pH.FP_mean,pH.FP_sd,pH.FP_n,Site
+RP01,41,Brazo del potero grande,04/01/2022,7.87,0.29,12,8.1,0.19,4,BdPG-B
+RP02,35,Brazo del potero grande,04/01/2022,7.87,0.29,12,8.1,0.19,4,BdPG-B
+RP03,26.2,Brazo del potero grande,04/01/2022,7.87,0.29,12,8.1,0.19,4,BdPG-B
+RP04,20,Brazo del potero grande,04/01/2022,7.87,0.29,12,8.1,0.19,4,BdPG-B
+RP05,28.3,Brazo del potero grande,04/01/2022,7.87,0.29,12,8.1,0.19,4,BdPG-A
+RP06,39,Brazo del potero grande,04/01/2022,7.87,0.29,12,8.1,0.19,4,BdPG-A
+RP07,19.5,Brazo del potero grande,04/01/2022,7.87,0.29,12,8.1,0.19,4,BdPG-A
+RP08,57,Brazo del potero grande,04/01/2022,7.87,0.29,12,8.1,0.19,4,BdPG-A
+RP09,32,Brazo del potero grande,04/01/2022,7.87,0.29,12,8.1,0.19,4,BdPG-A
+RP10,32,Pedregal,05/01/2022,8.25,0.15,10,8.34,0.04,7,P-A
+RP11,29,Pedregal,05/01/2022,8.25,0.15,10,8.34,0.04,7,P-A
+RP12,48,Pedregal,05/01/2022,8.25,0.15,10,8.34,0.04,7,P-A
+RP13,31.5,Pedregal,05/01/2022,8.25,0.15,10,8.34,0.04,7,P-A
+RP14,40.5,Pedregal,05/01/2022,8.25,0.15,10,8.34,0.04,7,P-A
+RP15,21,Pedregal,05/01/2022,8.25,0.15,10,8.34,0.04,7,P-A
+RP16,58,Pedregal,05/01/2022,8.25,0.15,10,8.34,0.04,7,P-B
+RP17,28.5,Pedregal,05/01/2022,8.25,0.15,10,8.34,0.04,7,P-B
+RP18,38,Pedregal,05/01/2022,8.25,0.15,10,8.34,0.04,7,P-B
+RP19,30,Pedregal,05/01/2022,8.25,0.15,10,8.34,0.04,7,P-B
+RP20,34,Murcielago,07/01/2022,8.2,0.13,12,8.16,0.09,10,M-A
+RP30,30,Murcielago,07/01/2022,8.2,0.13,12,8.16,0.09,10,M-A
+RP29,59,Murcielago,07/01/2022,8.2,0.13,12,8.16,0.09,10,M-A
+RP28,25,Murcielago,07/01/2022,8.2,0.13,12,8.16,0.09,10,M-B
+RP27,31,Murcielago,07/01/2022,8.2,0.13,12,8.16,0.09,10,M-B
+RP26,28,Murcielago,07/01/2022,8.2,0.13,12,8.16,0.09,10,M-B
+RP25,37,Murcielago,07/01/2022,8.2,0.13,12,8.16,0.09,10,M-B
+RP24,29,Murcielago,07/01/2022,8.2,0.13,12,8.16,0.09,10,M-B
+RP23,35,Murcielago,07/01/2022,8.2,0.13,12,8.16,0.09,10,M-B
+RP22,32,Murcielago,07/01/2022,8.2,0.13,12,8.16,0.09,10,M-B
+RP21,39,Murcielago,07/01/2022,8.2,0.13,12,8.16,0.09,10,M-B
+RP31,23,Brazo del potero grande,07/04/2022,7.97,0.06,4,7.98,0.05,3,BdPG-B
+RP32,60,Brazo del potero grande,07/04/2022,7.97,0.06,4,7.98,0.05,3,BdPG-B
+RP33,47,Brazo del potero grande,07/04/2022,7.97,0.06,4,7.98,0.05,3,BdPG-A
+RP34,,Brazo del potero grande,07/04/2022,7.97,0.06,4,7.98,0.05,3,BdPG-A
+RP35,59,Pedregal,08/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP36,32,Pedregal,08/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP37,33,Pedregal,08/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP38,28,Pedregal,08/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP39,20,Pedregal,10/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP40,20,Pedregal,10/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP41,39,Pedregal,10/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP43,21,Pedregal,10/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP44,29,Pedregal,10/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP45,33,Pedregal,11/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP46,55,Pedregal,11/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP47,42,Pedregal,11/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP48,40,Pedregal,11/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+RP42,43,Pedregal,10/04/2022,7.99,0.18,10,8.03,0.17,8,P-B
+10MR,,,,,,,,,,
+9FR_2,,,,,,,,,,
+8FR,,,,,,,,,,
+7FR,,,,,,,,,,
+6MR,,,,,,,,,,
+5MS,,,,,,,,,,
+4MR,,,,,,,,,,
+3FR,,,,,,,,,,
+2FR,,,,,,,,,,
+1FR,,,,,,,,,,
+11FR,,,,,,,,,,
+12FW,,,,,,,,,,
+13MS,,,,,,,,,,
+14FR,,,,,,,,,,
+9FR,,,,,,,,,,
+4MR_2,,,,,,,,,,
+13MS_2,,,,,,,,,,
+7_2,,,,,,,,,,
+3_2,,,,,,,,,,
+14_2,,,,,,,,,,
+10_2,,,,,,,,,,
+6_2,,,,,,,,,,
+2_2,,,,,,,,,,
+MOCK1,,,,,,,,,,
+MOCK2,,,,,,,,,,
+NEGATIVE1,,,,,,,,,,
+NEGATIVE2,,,,,,,,,,
+NTC,,,,,,,,,,
+Mock,,,,,,,,,,
