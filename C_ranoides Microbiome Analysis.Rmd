@@ -1,0 +1,1151 @@
+---
+title: "Craugastor Ranoides Microbiome Analysis"
+author: "Xav Harrison"
+date: "2025-07-29"
+output: 
+  html_document:
+    toc: true
+    number_sections: true
+    theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Libraries 
+Packages we'll need for all the stats
+```{r}
+
+  library(phyloseq) #microbiome data handling
+  library(ggplot2) #plotting 
+  library(dplyr) # data handling  
+  library(vegan) #plotting of community data like bacterial microbiomes and statistical models
+  library(decontam) #identifying contaminants in our sequencing workflow 
+  library(microbiome) # microbiome plotting and convenience functions
+  library(ggordiplots) # tidyverse versions of the vegan plots 
+  library(MASS) #generalized linear models of pathogen infection data (Negative Binomial Error Structure)
+  library(pheatmap) #pretty heatmaps
+  library(RColorBrewer) #Add Custom Colours (e.g. Colour Blind Friendy) 
+  library(MuMIn)
+    #devtools::install_github("BlakeRMills/MoMAColors")
+  library(MoMAColors)
+  library(tidybayes)
+  library(cowplot)
+  library(ggvenn) #install.packages('ggvenn')
+  library(janitor)
+  library(brms)
+  library(microbiomeutilities)
+  library(gllvm)
+  library(ComplexUpset)
+      
+```
+
+## Global Plotting Options 
+Quick access options for output graphics to make legends and axis labels larger / more legible
+
+```{r}
+
+#Global Plot Options
+            plotopts<- theme(axis.text=element_text(size=20),axis.title=element_text(size=22),strip.text=element_text(size=22),legend.title = element_text(size=20),legend.text = element_text(size=20)) 
+
+## Global Site Colors
+  #sitecols<-c(brewer.pal(8,"Set2"),brewer.pal(9,"Paired")[9])
+
+
+###### Stop Warnings turning into Errors
+ # options(warn=1)
+```
+
+## Our Data
+Load in Our Phyloseq Object
+```{r}
+
+load('CostaRica_Ranoides_Phyloseq.RData')
+
+```
+
+## Frog Metadata
+
+```{r}
+frogmeta<-read.csv('Ranoides_metadata_newsites_oct24.csv',header=T)
+head(frogmeta)
+
+frogmeta<-clean_names(frogmeta)
+rownames(frogmeta)<-frogmeta$sample
+
+########### CLEAN UP NEGATIVES AND SAMPLE TYPE VARIABLES    
+    frogmeta$sampletype<-"frog"
+    frogmeta$sampletype[grep("NEG|NTC",frogmeta$sample)]<-"Negative_Control"
+    frogmeta$sampletype[grep("MOCK|Mock",frogmeta$sample)]<-"Positive_Control"
+
+########### DATE MANIPULATION
+    table(frogmeta$date_time)
+    
+########## CODE UP TRIPS
+    frogmeta$study<-"spatial"
+     frogmeta$study[which(frogmeta$sampletype %in% c("Negative_Control","Positive_Control"))]<-"controls"
+    frogmeta$study[which(frogmeta$site_name=="" & !frogmeta$sampletype %in% c("Negative_Control","Positive_Control"))]<-"temporal"
+    table(frogmeta$study)
+
+##Code Up  Timepoints for Temporal 
+    frogmeta$timepoint<-NA
+    frogmeta$timepoint[frogmeta$study=="temporal"]<-"PreTranslocation"
+    frogmeta$timepoint[frogmeta$study=="temporal" & grepl("_",frogmeta$sample)]<-"PostTranslocation"
+
+##Code Up  Indivieduals for Temporal 
+    frogmeta$id<-NA
+    id_temp<- as.numeric(gsub(".*?([0-9]+).*", "\\1", frogmeta$sample))             
+    frogmeta$id[frogmeta$study=="temporal"]<-id_temp[frogmeta$study=="temporal"]
+    table(frogmeta$id)
+    
+############# STITCH TOGETHER
+      sample_data(ps)<-frogmeta
+      ps
+      
+      #write.csv(frogmeta,'Ranoides Sample Metadata Final.csv')
+```
+
+
+## FILTER UNWANTED TAXONOMY 
+```{r}
+  #Prune Taxa With No Phylum Assignment 
+    ps_prune<-prune_taxa(as.vector(!is.na(tax_table(ps)[,2])),ps)
+      ntaxa(ps)-ntaxa(ps_prune) #326
+      
+  #Prune Chloroplasts
+      ps_prune_nochloro<-prune_taxa(as.vector(tax_table(ps_prune)[,4]!="Chloroplast"),ps_prune)
+      ntaxa(ps_prune)-ntaxa(ps_prune_nochloro) #2827
+
+      
+  #Remove Mitochondria    
+      ps_prune_nochloro_nomito<-prune_taxa(as.vector(tax_table(ps_prune_nochloro)[,5]!="Mitochondria"),ps_prune_nochloro)
+
+  #Remove     
+    ps_prune_nochloro_nomito_noarchaea<-prune_taxa(as.vector(tax_table(ps_prune_nochloro_nomito)[,1]!="Archea"),ps_prune_nochloro_nomito)
+
+    ps_prune_nochloro_nomito_noarchaea
+
+```
+
+## Identifying and Removing Decontaminants
+```{r}
+
+## Flag Negatives
+  sample_data(ps_prune_nochloro_nomito_noarchaea)$is_negative<- sample_data(ps_prune_nochloro_nomito_noarchaea)$sampletype=="Negative_Control"
+
+##Inspect Library SIzes
+  df <- as.data.frame(sample_data(ps_prune_nochloro_nomito_noarchaea)) # Put sample_data into a ggplot-friendly data.frame
+  df$LibrarySize <- sample_sums(ps_prune_nochloro_nomito_noarchaea)
+  df <- df[order(df$LibrarySize),]
+  df$Index <- seq(nrow(df))
+  ggplot(data=df, aes(x=Index, y=LibrarySize, color=is_negative)) + geom_point()
+
+#Negatives Based on Prevalence // Threshold 0.5
+  contamdf.prev <- isContaminant(ps_prune_nochloro_nomito_noarchaea, method="prevalence", neg="is_negative",threshold=0.5)
+  table(contamdf.prev$contaminant) #51
+
+#Plot 
+  ps.pa <- transform_sample_counts(ps_prune_nochloro_nomito_noarchaea, function(abund) 1*(abund>0))
+  ps.pa.neg <- prune_samples(sample_data(ps.pa)$is_negative == TRUE, ps.pa)
+  ps.pa.pos <- prune_samples(sample_data(ps.pa)$is_negative == FALSE, ps.pa)
+  # Make data.frame of prevalence in positive and negative samples
+  df.pa <- data.frame(pa.pos=taxa_sums(ps.pa.pos), pa.neg=taxa_sums(ps.pa.neg),
+                      contaminant=contamdf.prev$contaminant)
+  ggplot(data=df.pa, aes(x=pa.neg, y=pa.pos, color=contaminant)) + geom_point() +
+    xlab("Prevalence (Negative Controls)") + ylab("Prevalence (True Samples)")
+
+
+####### PRUNE OUT
+  ps_clean<-prune_taxa(contamdf.prev$contaminant==FALSE,ps_prune_nochloro_nomito_noarchaea)
+
+
+######## Inspect POSITIVES
+      ps_clean_positives<-prune_samples(sample_data(ps_clean)$sampletype=="Positive_Control",ps_clean)
+      ps_clean_positives<-filter_taxa(ps_clean_positives, function(x) (sum(x) > 0),TRUE)
+      data.frame(reads=taxa_sums(ps_clean_positives),genus=tax_table(ps_clean_positives)[,6])
+
+ 
+```
+
+## Filter Based on Prevalence and Abundance
+```{r}
+
+####### Read Threshold and Sample Prevalence Threshold
+  ps_clean_filter = filter_taxa(ps_clean, function(x) sum(x > 20) > (5), TRUE)
+
+ ######### SUBSET TO ONLY FROGS AND WATER (ALSO STRIP NAs)
+  ps_clean_samples<-prune_samples(sample_data(ps_clean_filter)$sampletype %in% c("frog"),ps_clean_filter)  
+ ps_clean_samples
+
+```
+
+## Mock Community 
+```{r}
+
+##Inspect Mock After Removing ASVs filtered at previous step 
+  ps_mock<-prune_samples(sample_data(ps_clean_filter)$sampletype %in% c("Positive_Control"),ps_clean_filter)
+  ps_mock<-filter_taxa(ps_mock, function(x) (sum(x) > 0),TRUE)
+  mock_dataframe<-data.frame(reads=taxa_sums(ps_mock),genus=tax_table(ps_mock)[,6])
+  
+#Imposters in Mocks
+  mock_imposters<-rownames(mock_dataframe)[mock_dataframe[,1]<1000]
+  
+#What Proportion of Dataset
+  taxa_sums_data<-data.frame(taxa_sums(ps_clean_filter))
+  subset(taxa_sums_data,rownames(taxa_sums_data) %in% mock_imposters)
+```
+
+
+## Assessing Post-QC Sample Coverage and Library Sizes
+  
+  Now that we've done that, we can check what our post-QC library sizes are. It's a good idea to report these in manuscripts and thesis chapters. Here was ask what the minimum, maximum and mean library sizes-per-samples are. 
+  
+
+```{r}
+ ############## POST QC LIBRARY SIZES
+      
+      ###############
+      # Post-QC Library Stats
+      ###############
+      
+      mean(sample_sums(ps_clean_samples))
+      range(sample_sums(ps_clean_samples))
+```
+
+## Reads by Site and Study
+```{r}      
+      #Make a data frame of read depths
+        frog_reads<-data.frame(reads=sample_sums(ps_clean_samples))
+        range(frog_reads$reads)
+      #Add on the sample ID
+        frog_reads$sample<-rownames(frog_reads)
+        
+      #Join on the Metadata
+        frog_meta<-as(sample_data(ps_clean_samples),"data.frame")
+        frog_reads<-left_join(frog_reads,frog_meta,"sample")
+      
+      #Some Boxplots of Coverage by NEW Population using ggplot2
+            ggplot(frog_reads,aes(x=site,y=reads)) + geom_violin()
+
+        #Some Boxplots of Coverage by OLD Population using ggplot2
+            ggplot(frog_reads,aes(x=site_name,y=reads)) + geom_violin()
+
+        #Some Boxplots of Coverage by Population using ggplot2
+            ggplot(frog_reads,aes(x=study,y=reads)) + geom_violin()
+```
+
+# ANALYSIS 
+
+## Rarefaction Curves
+
+```{r}
+  #Strip Out the OTU Table
+    ps_clean_otutable<-as(t(otu_table(ps_clean_samples)),"matrix")
+    class(ps_clean_otutable)<-"matrix"
+    
+  #Rarefaction Curves
+    raremax <- min(rowSums(ps_clean_otutable))
+    ps_clean_otutable[1,1]<-1
+    rarecurve(ps_clean_otutable,step=50,sample = 100000)
+
+```
+
+## Rarefying Samples
+```{r}
+
+        #remind ourselves what the minimum coverage is 
+          min(sample_sums(ps_clean_samples))
+
+        #Histogram 
+          hist(sample_sums(ps_clean_samples),breaks=10000)
+
+    # Rarefy to lowest library size, set random number see for reproducibility
+        ps_rare<-rarefy_even_depth(ps_clean_samples,rngseed = 150517,sample.size=15000)
+  
+```
+
+### Estimate Richness
+```{r}
+
+#Estimate Observed RIchness and Shannon Diversity
+  frog_rich<-estimate_richness(ps_rare,measures=c('Shannon','Observed'))
+  frog_rich$sample<-gsub("^X","",rownames(frog_rich))
+  
+#Add On Sample metadata
+  frog_rich<-left_join(frog_rich,frog_meta,"sample")
+
+## ID Replication?
+  table(paste0(frog_rich$colour_left,frog_rich$colour_right))
+
+## Site Colours
+  sitecols<-brewer.pal(7,"Paired")[c(1,3,5)]
+```
+
+### Does Richness Vary By Site - Spatial
+
+```{r}
+
+#Spatial Project Only
+  frog_spatial<-subset(frog_rich,study=="spatial")
+  table(frog_spatial$site)
+  frog_spatial$site_name2<-frog_spatial$site_name
+    frog_spatial$site_name_short<-sapply(strsplit(frog_spatial$site,"-"),"[",1)
+     frog_spatial$site_name2[frog_spatial$site_name2=="Brazo del potero grande"]<-"Brazo del \n potrero grande "
+ 
+
+#Plot by Site OLD
+  site_richness1<- frog_spatial %>% ggplot(.,aes(y=Observed,x=site_name2)) + geom_point(aes(fill=site_name2),shape=21,size=6,colour="white") + stat_pointinterval(shape=21,point_fill="white",point_size=5,colour="black",slab_alpha=0.5) +  theme_bw() + plotopts
+  site_richness2 <- site_richness1 + guides(fill="none") + labs(y="Alpha Diversity (Richness)",x="Site")  + scale_fill_manual(values=sitecols)  +  theme(axis.text.x=element_text(angle=25,hjust=1))
+  site_richness2
+      #ggsave2('Ranoides Richness by Site.pdf',site_richness2,width=20,height=15,units="cm")
+
+#Plot by Site NEW
+  site_new_richness1<- frog_spatial %>% ggplot(.,aes(y=Observed,x=site)) + geom_point(aes(fill=site),shape=21,size=6,colour="white",position = position_jitter(width=0.15)) + stat_pointinterval(shape=21,point_fill="white",point_size=5,colour="black",slab_alpha=0.5) +  theme_bw() + plotopts
+  site_new_richness2 <- site_new_richness1 + guides(fill="none") + labs(y="Alpha Diversity \n(Richness)",x="Site")  + scale_fill_brewer(palette = "Paired")  +  theme(axis.text.x=element_text(angle=25,hjust=1))
+  site_new_richness2
+  
+#Shannon by Site NEW
+  site_new_shannon1<- frog_spatial %>% ggplot(.,aes(y=Shannon,x=site)) + geom_point(aes(fill=site),shape=21,size=6,colour="white",position = position_jitter(width=0.15)) + stat_pointinterval(shape=21,point_fill="white",point_size=5,colour="black",slab_alpha=0.5) +  theme_bw() + plotopts
+  site_new_shannon2 <- site_new_shannon1 + guides(fill="none") + labs(y="Alpha Diversity \n(Richness)",x="Site")  + scale_fill_brewer(palette = "Paired")  +  theme(axis.text.x=element_text(angle=25,hjust=1))
+  site_new_shannon2  
+
+#Plot by Size
+ svl_richness1<- frog_spatial %>% ggplot(.,aes(y=Observed,x=sv_mm)) + geom_smooth(method = "lm") +  geom_point(aes(fill=site_name_short),shape=21,size=6,colour="white") +  theme_bw() + plotopts
+  svl_richness2 <- svl_richness1 +theme(legend.position = "top") + labs(fill="Site",y="Alpha Diversity \n(Richness)",x="Snout Vent Length (mm)")  + scale_fill_manual(values=sitecols)  + facet_wrap(.~site_name_short)
+  svl_richness2
+  
+  ggsave2('Ranoides Richness by SVL.pdf',svl_richness2,width=20,height=15,units="cm")
+
+#RIchness by pH
+   ph_richness1<- frog_spatial %>% ggplot(.,aes(y=Observed,x=p_h_mean)) + geom_smooth(method = "lm") +  geom_point(aes(fill=site_name_short),shape=21,size=6,colour="white") +  theme_bw() + plotopts
+  ph_richness2 <- ph_richness1 +theme(legend.position = "top") + labs(fill="Site",y="Alpha Diversity \n(Richness)",x="pH")  + scale_fill_manual(values=sitecols)  #+ facet_wrap(.~site)
+  ph_richness2
+  ggsave2('pH Richness.png',ph_richness2,dpi=150)
+  
+  
+  with(frog_spatial,cor.test(Observed,p_h_mean))
+```
+
+## Richness Models
+```{r}
+richmod1<-brm(Observed ~ sv_mm + site_name_short,data=frog_spatial,family=negbinomial())
+summary(richmod1)
+
+conditional_effects(richmod1)
+
+#Add Null Model
+frog_spatial_nona<-subset(frog_spatial,!is.na(sv_mm)) #remove NA value for SVL
+richmod1_null<-brm(Observed ~ 1,data=frog_spatial_nona,family=negbinomial())
+summary(richmod1_null)
+richmod1_null<-add_criterion(richmod1_null,"loo")
+richmod1<-add_criterion(richmod1,"loo")
+
+print(loo_compare(richmod1,richmod1_null),simplify = F)
+
+#Pull Out Predicted Data
+  rich_post<-conditional_effects(richmod1)[2]$site_name_short
+
+
+### Posterior Plots
+  site_new_richness_bayes1<- ggplot() + geom_point(data=frog_spatial,aes(fill=site_name_short,y=Observed,x=site_name_short),shape=21,size=6,colour="white",position = position_jitter(width=0.15)) + geom_errorbar(data=rich_post,aes(x=site_name_short,ymin=lower__,ymax=upper__),width=0.15) + geom_point(data=rich_post,aes(x=site_name_short,y=estimate__),shape=21,size=5,fill="white") +  theme_bw() + plotopts
+  site_new_richness_bayes2 <- site_new_richness_bayes1 + guides(fill="none") + labs(y="Alpha Diversity \n(Richness)",x="Site")  + scale_fill_manual(values=sitecols)  +  theme(axis.text.x=element_text(angle=25,hjust=1))
+  site_new_richness_bayes2
+
+
+```
+
+## ORDINATIONS
+
+### Centred-Log Ratio Ordinations (CLR)
+Will Just do on Frogs for this now
+```{r}
+    
+    ### Just Frogs 
+      ps_clean_spatial<-prune_samples(sample_data(ps_clean_samples)$study=="spatial",ps_clean_samples)
+      sample_data(ps_clean_spatial)$site_name_short<-sapply(strsplit(sample_data(ps_clean_spatial)$site,"-"),"[",1)
+
+    #CLR TRANSFORM
+        ps_spatial_clr<-microbiome::transform(ps_clean_spatial, 'clr')
+      #Ordinate
+        ord_spatial_clr <- phyloseq::ordinate(ps_spatial_clr, "RDA")
+        phyloseq::plot_ordination(ps_spatial_clr, ord_spatial_clr, type="samples", color="site_name")
+      
+      #GG Version NEW SITES
+        gg_ordiplot(ord_spatial_clr,sample_data(ps_spatial_clr)$site,spiders = TRUE,ellipse = T)
+              #GG Version
+        gg_ordiplot(ord_spatial_clr,sample_data(ps_spatial_clr)$site_name_short,spiders = TRUE,ellipse = T)
+        
+  
+  #### Extract for Plotting 
+        #Plot and Extract for GGPLot2
+    x1 <- gg_ordiplot(ord_spatial_clr,sample_data(ps_spatial_clr)$site_name_short,spiders = TRUE,ellipse = T,plot=F)
+    x1_plotdata<- x1$df_ord
+    x1_plotdata$Group<-as.character(x1_plotdata$Group)
+    #x1_plotdata$Group[which(x1_plotdata$Group=="Brazo del potero grande")]<-"Cerro Ingles"
+    
+    
+### Site Labels 
+    
+    
+  #Plot Spiders  
+    frog_site_clr_plot1<-ggplot(x1_plotdata,aes(x=x,y=y)) + geom_segment(data=x1$df_spiders, aes(x=cntr.x, xend=x, y=cntr.y, yend=y, color=Group), show.legend = FALSE) 
+  #Plot Points  
+    frog_site_clr_plot2<- frog_site_clr_plot1 + geom_point(shape=21,color="white",aes(fill=Group),size=5) + theme_bw()
+  #Ellips
+    frog_site_clr_plot3<- frog_site_clr_plot2 + geom_path(data = x1$df_ellipse, aes(x=x, y=y, color=Group), show.legend = FALSE)
+ #Colour
+    frog_site_clr_plot4<- frog_site_clr_plot3 + labs(x="PC1 (10.97%)",y="PC2 (7.29%)",fill="Site") + plotopts + scale_fill_manual(values=sitecols) + scale_color_manual(values=sitecols) + theme(legend.position = "bottom")
+frog_site_clr_plot4
+
+ggsave2('CLR Beta Diversity By SITE.pdf',frog_site_clr_plot4,width=22,height=15,units="cm")
+
+        
+```
+  
+## BETA DIVERSITY
+
+### Barplots of Community Structure
+We can summarise our microbial communities using compositional barplots, which provide a quick and accessible way of visualising differences in taxonomy at different hierarchies. 
+
+The first step here is to remove samples in our phyloseq object with low reads, otherwise this will break our averaging
+
+```{r}
+
+#Filter Samples with no Data - FROGS
+  ranoides_ps_spatial<-prune_samples(sample_sums(ps_rare)>0& sample_data(ps_rare)$study=="spatial",ps_rare)
+
+
+```
+
+### Top N Approach
+The plots can get quite messy - so it's not uncommon to just subset to the top 'N' of a taxonomic group for easier visualisation 
+
+```{r}
+
+#What Are the Names of the most abundant phyla?  
+  ranoides_ps_spatial_phylum<- ranoides_ps_spatial %>% aggregate_taxa(level="Phylum")
+  physeq_top5phyla = names(sort(taxa_sums(ranoides_ps_spatial_phylum), TRUE)[1:5])
+  physeq_top5phyla 
+
+#Subset the phyloseq object to those phyla   
+  ranoides_ps_spatial_phylumtop5<-subset_taxa(ranoides_ps_spatial,Phylum %in% physeq_top5phyla)
+  sample_data(ranoides_ps_spatial_phylumtop5)$site_name_short<-sapply(strsplit(sample_data(ranoides_ps_spatial_phylumtop5)$site,"-"),"[",1)
+
+
+#Remake Our Graph  but with no grouping (samples)
+ranoides_ps_spatial_phylumplot <- ranoides_ps_spatial_phylumtop5 %>%
+  aggregate_taxa(level = "Phylum") %>%  
+  microbiome::transform(transform = "compositional") %>%
+  plot_composition(sample.sort = "Proteobacteria",group_by="site_name_short") + theme_bw(base_size=15) +   scale_fill_manual(values = moma.colors("Levine2", direction=-1))  + labs(fill="Phylum",x="") + theme(legend.position = "top",axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+ranoides_ps_spatial_phylumplot 
+
+
+```
+
+## Combined Spatial Fig. 
+
+```{r}
+
+spatial_fig<-plot_grid(site_new_richness_bayes2,frog_site_clr_plot4,labels="AUTO",label_size = 25)
+  spatial_fig2<-plot_grid(spatial_fig,ranoides_ps_spatial_phylumplot,nrow=2,labels=c("","C"),label_size = 25)
+  spatial_fig2
+  ggsave2('Fig 3 Spatial Microbiota Patterns.pdf',width=30,height=25,units="cm")
+  ggsave2('Fig 3 Spatial Microbiota Patterns.png',width=30,height=25,units="cm")
+
+```
+
+## Heatmaps
+### Heatmaps in _phyloseq_
+```{r}
+
+#####  HEATMAP (baked into phyloseq)
+
+    #Subset to Most 50 abundant OTUs
+     ps_rare_top50 <- prune_taxa(names(sort(taxa_sums(ps_rare),TRUE)[1:50]), ps_rare)
+    ps_rare_top50_spatial<-prune_samples(sample_data(ps_rare_top50)$study=="spatial",ps_rare_top50)
+    
+    #Plot Heatmap with X axis ordered Inter-Sample Distance    
+      plot_heatmap(ps_rare_top50_spatial,"NMDS",distance = "bray")  
+    
+    #And again, with explicit ordering of samples by SITE
+      plot_heatmap(ps_rare_top50_spatial,"NMDS",distance = "bray",sample.label="site")  
+
+```
+
+
+### Other Heatmaps (pheatmap)
+
+```{r}
+
+    #Generate Metadata for Plotting Colours (SITE ID)
+      site_data<-data.frame(Site=sample_data(ps_rare_top50_spatial)$site)
+      rownames(site_data)<-rownames(sample_data(ps_rare_top50_spatial))
+    #Strip Out OTU_Table
+       ps_rare_top50_spatial_otu<-otu_table(ps_rare_top50_spatial)
+    
+    #Plot Heatmap - No Explicit Clustering 
+      pheatmap(ps_rare_top50_spatial_otu,cluster_cols = FALSE,scale="row",annotation_col = site_data,border_color = "white")
+```
+
+Now cluster columns by similarity
+```{r}
+    #As Above, But Order Columns (Samples) by Similarity  
+      pheatmap(ps_rare_top50_spatial_otu,cluster_cols = TRUE,scale="row",annotation_col = site_data,border_color = "white")
+```
+
+
+## PERMANOVA: Statistical Testing of Beta Diversity
+
+### Getting the Data Ready 
+```{r}
+
+  #Convenience Functions
+#Function to Extract the Data from phyloseq in a format vegan can understand
+        vegan_otu <- function(physeq) {
+          OTU <- otu_table(physeq)
+          if (taxa_are_rows(OTU)) {
+            OTU <- t(OTU)
+          }
+          return(as(OTU, "matrix"))
+        }
+
+
+   #Extract Matrix and Sample Data  
+          frog_spatial_clr_v<-vegan_otu(ps_spatial_clr)
+          frog_spatial_clr_s<-as(sample_data(ps_spatial_clr),"data.frame")
+          frog_spatial_clr_v2<-frog_spatial_clr_v[-which(is.na(frog_spatial_clr_s$sv_mm)),]
+          frog_spatial_clr_s2<-frog_spatial_clr_s[-which(is.na(frog_spatial_clr_s$sv_mm)),]
+                
+        ## Perform PERMANOVA        
+          frog_clr_perm <- adonis2(frog_spatial_clr_v2 ~ site_name_short + sv_mm ,data=frog_spatial_clr_s2, permutations=999,method="euclidean",by="terms")
+        frog_clr_perm
+        
+        
+        ## Perform PERMANOVA        
+          frog_clr_perm <- adonis2(frog_spatial_clr_v2 ~ site + sv_mm ,data=frog_spatial_clr_s2, permutations=999,method="euclidean",by="mar")
+        frog_clr_perm 
+        
+            frog_clr_ph_perm <- adonis2(frog_spatial_clr_v2 ~ p_h_mean ,data=frog_spatial_clr_s2, permutations=999,method="euclidean",by="mar")
+        frog_clr_ph_perm  
+          
+```
+
+# GLLVM 
+
+```{r}
+
+
+## OTUs Top 50
+  ranoides_genus<-aggregate_top_taxa2(ps_clean_spatial, "Genus", top = 50)
+  ranoides_clr_scaled <-microbiome::transform(ranoides_genus, transform = "clr")
+  sample_data(ranoides_clr_scaled)$site_name_short<-sapply(strsplit(sample_data(ranoides_clr_scaled)$site,"-"),"[",1)
+
+#Extract
+  ys <- data.frame(t(otu_table(ranoides_clr_scaled)))
+  names(ys) <-taxa_names(ranoides_clr_scaled)
+  
+#Predictors
+  Xs<-data.frame(sample_data(ranoides_clr_scaled)) %>% dplyr::select(site_name_short,p_h_mean,sv_mm)
+  
+#Strip Missing SVL 
+  sv_miss<-which(is.na(Xs$sv_mm))
+    Xs<-Xs[-sv_miss,]
+    ys<-ys[-sv_miss,]
+    
+## Model 
+  # fit_reduced_scaled <- gllvm(ys, Xs, 
+  #                             num.lv = 2,
+  #                             formula = ~ p_h_mean + sv_mm,
+  #                             family = "gaussian",starting.val='zero',
+  #                             row.eff = "random",randomX=~site_name_short)
+  # 
+      fit_reduced_scaled <- gllvm(ys, Xs, 
+                              num.lv = 2,
+                              formula = ~ site_name_short + sv_mm,
+                              family = "gaussian",starting.val='zero')
+ 
+    coefplot(fit_reduced_scaled)
+    #plot(fit_reduced_scaled)
+    
+#Estimates 
+  df<-coef(fit_reduced_scaled)
+  est_df<-data.frame(df$Intercept)
+  est_df2<-data.frame(df$Xcoef) 
+  est_df3<-merge(est_df, est_df2, by = 0)
+  
+#Order genera
+  row.names(est_df3)<-est_df3$Row.names
+  est_df3<-est_df3[colnames(ys),]
+  names(est_df3)[1]<- "Genus"
+  names(est_df3)[2]<- "Intercept"
+  names(est_df3)[3:5]<-c("Site M", "Site P", "SVL")
+
+### COnfidence Intervals
+  confint_df<-data.frame(confint(fit_reduced_scaled))
+  
+###Strip Out Individual Datasets
+  ##Site M
+    siteM_locs<-grepl("Xcoef.site_name_shortM",rownames(confint_df))
+    siteM_data<-cbind(est_df3[,c("Genus","Site M")],confint_df[siteM_locs,])
+        colnames(siteM_data)<-c("Genus","Estimate","l95","u95")
+        siteM_data$trait<-"Site M"
+  ## Site P  
+      siteP_locs<-grepl("Xcoef.site_name_shortP",rownames(confint_df))
+      siteP_data<-cbind(est_df3[,c("Genus","Site P")],confint_df[siteP_locs,])
+        colnames(siteP_data)<-c("Genus","Estimate","l95","u95")
+        siteP_data$trait<-"Site P"
+
+  ##SVL
+      svl_locs<-grepl("Xcoef.sv_mm",rownames(confint_df))
+      svl_data<-cbind(est_df3[,c("Genus","SVL")],confint_df[svl_locs,])
+        colnames(svl_data)<-c("Genus","Estimate","l95","u95")
+        svl_data$trait<-"SVL"
+
+
+  ranoides_mod_plotdata<-rbind(siteM_data,siteP_data,svl_data)
+  
+  #Strip Out Overly Long Multi-Genus Assignment
+   # ranoides_mod_plotdata2<-ranoides_mod_plotdata[-which(grepl("Allorhizobium-",ranoides_mod_plotdata$Genus)),]
+
+
+  ranoides_mod_plotdata3<- ranoides_mod_plotdata %>% group_by(trait)  %>% arrange(Estimate,.by_group=T)
+  ranoides_mod_plotdata3$Genus<-factor(ranoides_mod_plotdata3$Genus,levels=unique(ranoides_mod_plotdata3$Genus))
+  
+#Significance  
+  ranoides_mod_plotdata3$Sig<- !data.table::between(0, ranoides_mod_plotdata3$l95, ranoides_mod_plotdata3$u95)
+#Filter by Significance 
+  ranoides_mod_plotdata_sig<-subset(ranoides_mod_plotdata3,Sig==T)
+  
+### plot  
+  ranoides_gllvm_plot1<-ggplot(ranoides_mod_plotdata_sig,aes(x=Estimate,y=Genus)) + geom_errorbarh(aes(xmin=l95,xmax=u95),color="grey22") + geom_point(size=5,shape=21,color="gray40",fill="cornflowerblue",alpha=1) + theme_bw()
+  ranoides_gllvm_plot2<- ranoides_gllvm_plot1 + theme_bw(base_size = 15) + geom_vline(xintercept=0,linetype="dashed") + guides(fill="none",color="none") + facet_wrap(.~trait,scales = "free_x")
+  ranoides_gllvm_plot2
+  
+  ggsave2('Ranoides GLLVM Output.png',ranoides_gllvm_plot2,width=20,height=15,units="cm")
+  
+
+```
+
+# UpSet Plot 
+```{r}
+
+#Create A Presence/Absence Dataframe for UpSet Plots
+  upsetda <- MicrobiotaProcess::get_upset(obj=ps_clean_spatial, factorNames="site_name_short")
+
+#Copy Across Phylum Level Data
+  Phylumvals<-as.vector(tax_table(ps_clean_spatial)[,2][match(rownames(upsetda),rownames(tax_table(ps_clean_spatial)))])
+  
+#Tabluate and Rank by Frequency of Phylum
+  top5phyla<- data.frame(table(Phylumvals)) %>% arrange(desc(Freq))
+#Overwrite any not in the top X as "Other"  
+  Phylumvals[which(!Phylumvals %in% as.character(top5phyla$Phylumvals[1:5]))]<-"Other"
+  
+#Copy Across    
+  upsetda$Phylum<-factor(Phylumvals,levels=c("Actinobacteriota","Bacteroidota","Firmicutes","Proteobacteria","Verrucomicrobiota","Other"))
+    
+#install.packages("ComplexUpset")
+#library(ComplexUpset)
+
+#Sets
+  sites<-colnames(upsetda)[1:3]
+  
+#Trim ASVs not in Any of the 6
+  upsetda_trimmed<-upsetda[apply(upsetda[,1:3],1,sum)>0,]
+    
+#Basic Upset Plot
+  upset(upsetda_trimmed,sites)
+
+#Cols to Overlap With Phylum Plot 
+  upsetcols<-c(moma.colors("Levine2",direction = -1)[c(2:5)],moma.colors("Rattner",3)[2:3])
+  
+#Add a Stacked Barplot for Phylum
+   ranoides_upset<-upset(
+    upsetda_trimmed,sites,set_size=FALSE,
+    themes=upset_default_themes(text=element_text(size=16),legend.position="top"),base_annotations=list(
+        'Intersection size'=intersection_size(counts=TRUE)),
+    annotations = list(
+        'Phylum'=(
+            ggplot(mapping=aes(fill=Phylum))
+            + geom_bar(stat='count', position='fill')
+            + scale_y_continuous(labels=scales::percent_format())
+            + ylab('Phylum') + scale_fill_manual(values = upsetcols) 
+        )
+    ),
+    width_ratio=0.1
+)
+ranoides_upset
+
+cowplot::ggsave2('Ranoides Upset Plot and PhylumStack.pdf',ranoides_upset,width=20,height=25,units="cm")
+cowplot::ggsave2('Ranoides Upset Plot and PhylumStack.png',ranoides_upset,width=20,height=25,units="cm")
+
+```
+
+# Sample Similarity Network
+```{r}
+
+library(NetCoMi)
+library(SpiecEasi)
+
+#Build Network
+    spatial_sample_net <- netConstruct(ps_spatial_clr,,dataType = "counts",measure = "aitchison",
+                        measurePar = list(method = "mb",
+                        pulsar.params = list(rep.num = 10),
+                        symBetaMode = "ave"),
+                            normMethod = "clr",
+                            sparsMethod = "knn")
+    
+#Analyse and Plot
+  spatial_sample_net_an <- netAnalyze(spatial_sample_net, clustMethod = "cluster_fast_greedy")
+  
+
+######### NAIVE PLOT WITH STATISTICAL CLUSTERS
+  plot(spatial_sample_net_an,rmSingles = T)
+  
+######## VERSION TO MATCH ASV NETWORK - CLUSTERS ARE COLOURED, SAMPLE TYPE = SHAPE 
+  
+#Features to Show Sample Type (ALSO USED BELOW)
+  featvec<-frog_spatial_clr_s$site_name_short
+  names(featvec)<-frog_spatial_clr_s$sample
+  
+#Site Labels
+  site_labs<-frog_spatial_clr_s$site_name_short
+  names(site_labs)<-frog_spatial_clr_s$sample
+  
+png('Ranoides Sample Network ClusterCol.png',res=600,width=40,height=30,units="cm")  
+   plot(spatial_sample_net_an,rmSingles = T,
+    repulsion=1.2,
+     labelScale = FALSE,
+     cexLabels = 1,
+     cexNodes = 1,layout="spring",nodeSize = "fix",
+     featVecShape=featvec,nodeColor = "cluster",featVecCol =featvec,labels=site_labs,colorVec = brewer.pal(6,"Dark2")[1:3])
+  legend("topright", title = "",legend=c("BdPG","M","P"), bty = "n",pch=c(16,15,17),xpd=T,cex = 3, pt.cex = 5,y.intersp=1,x.intersp = 1,col="gray") 
+   dev.off() 
+```
+
+
+
+# TEMPORAL ANALYSIS
+
+
+## Translocation Frog Mass Dynamics
+```{r}
+transmass<-read.csv('Ranoides Trip 2 data.csv')
+transmass<-janitor::clean_names(transmass)
+
+#Pivot to Long Format
+  library(tidyr)
+  transmass$weight_post[transmass$weight_post=="No recapture"]<-NA
+  transmass$weight_post<-as.numeric(transmass$weight_post)
+  tmass_long<-pivot_longer(transmass,cols = starts_with("weight"),names_to="time")
+  tmass_long$time<-factor(tmass_long$time,levels=c("weight_pre","weight_post"),labels = c("PreTranslocation","PostTranslocation"))
+  tmass_long$frog_number<-factor(tmass_long$frog_number)
+```
+
+## Richness over Time
+```{r}
+
+frog_temporal<-subset(frog_rich,study=="temporal")
+frog_temporal$timepoint<-factor(frog_temporal$timepoint,levels=c("PreTranslocation","PostTranslocation"))
+frog_temporal<-frog_temporal %>% arrange(id)
+frog_temporal$id<-factor(frog_temporal$id)
+frog_temporal$sex<-transmass$sex[match(frog_temporal$id,transmass$frog_number)]
+
+#Plotting Colours 
+  library(Polychrome)
+    IDcols<-data.frame(id=seq(14),colval = palette36.colors(14))     
+frog_temporal$colval<-IDcols$colval[match(frog_temporal$id,IDcols$id)]
+
+##Plot
+  frog_temporal_richplot1<-ggplot(frog_temporal,aes(x=timepoint,y=Observed)) + geom_line(aes(group=id,color=id),position = position_dodge(width=0.2),linewidth=1.2) + geom_point(size=6,aes(fill=id,shape=sex),colour="white",position = position_dodge(width=0.2)) + theme_bw()
+  frog_temporal_richplot2<- frog_temporal_richplot1 + plotopts + labs(x="Time Point",y="Alpha Diversity \n(Richness)") + guides(fill="none",color="none") + scale_fill_manual(values=IDcols$colval) + scale_color_manual(values=IDcols$colval) + scale_shape_manual(values=c(21,23)) + guides(shape = guide_legend(override.aes = list(size = 5,shape=c(21,23),fill="grey")),fill=guide_legend(override.aes = list(shape=21))) + labs(shape="Sex",fill="Frog ID") + theme(axis.text.x=element_text(size=12))
+  frog_temporal_richplot2
+
+  # frog_temporal_richplot3<-ggplot(frog_temporal,aes(x=timepoint,y=Observed)) + geom_line(aes(group=id,color=id),position = position_dodge(width=0.2),linewidth=1.2) + geom_point(size=6,shape=21,aes(fill=id),colour="white",position = position_dodge(width=0.2)) + theme_bw()
+  # frog_temporal_richplot4<- frog_temporal_richplot1 + plotopts + labs(x="Time Point",y="Alpha Diversity \n(Richness)") + guides(fill="none",color="none") + scale_fill_manual(values=unname(palette36.colors(14))) + scale_color_manual(values=unname(palette36.colors(14))) 
+  # frog_temporal_richplot4
+
+  
+```
+
+```{r}
+  
+#### PLOTS
+  
+transloccols<-IDcols$colval[match(tmass_long$frog_number,IDcols$id)]
+
+# ggplot(tmass_long,aes(x=time,y=value)) + geom_point(aes(fill=frog_number),shape=21,size=5) + theme_bw(base_size=15) + labs(y="Mass (g)",x="Time Point") + guides(fill="none") + scale_fill_manual(values=IDcols) + scale_color_manual(values=transloccols) 
+# 
+massplot1<-ggplot(tmass_long,aes(x=time,y=value)) + geom_line(aes(group=frog_number,color=frog_number),position=position_dodge(width=0.2)) + geom_point(aes(fill=frog_number,shape=sex),position=position_dodge(width=0.2),size=7,color="white") + theme_bw(base_size=20) + labs(y="Mass (g)",x="Time Point") + guides(color="none") + scale_fill_manual(values=unname(palette36.colors(14))) + scale_color_manual(values=unname(palette36.colors(14))) + scale_shape_manual(values=c(21,23))
+massplot2<- massplot1 + guides(shape = guide_legend(override.aes = list(size = 5,shape=c(21,23),fill="grey")),fill=guide_legend(override.aes = list(shape=21))) + labs(shape="Sex",fill="Frog ID")
+massplot2
+ggsave2('Translocation Mass Dynamics.png',massplot2,width=10,height=10)
+```
+
+## Plot Beta Diversity Over Time
+
+## Beta Diversity
+```{r}
+
+  ### Just Frogs 
+      ps_clean_temporal<-prune_samples(sample_data(ps_clean_samples)$study=="temporal",ps_clean_samples)
+
+    #CLR TRANSFORM
+        ps_temporal_clr<-microbiome::transform(ps_clean_temporal, 'clr')
+        
+      #Ordinate
+        ord_temporal_clr <- phyloseq::ordinate(ps_temporal_clr, "RDA")
+        #phyloseq::plot_ordination(ps_spatial_clr, ord_spatial_clr, type="samples", color="site_name")
+  
+      #Extract Scores
+        temporal_scores<-as.data.frame(scores(ord_temporal_clr)$sites)
+        temporal_scores$sample<-rownames(temporal_scores)
+        temporal_scores<-left_join(temporal_scores,frog_meta,"sample")
+        temporal_scores$id<-factor(temporal_scores$id)
+        temporal_scores$timepoint<-factor(temporal_scores$timepoint,levels=c("PreTranslocation","PostTranslocation"))
+```
+
+### Ordination Over TIme
+```{r}
+
+   
+      #GG Version
+        gg_ordiplot(ord_temporal_clr,sample_data(ps_temporal_clr)$timepoint,spiders = TRUE,ellipse = T)
+        
+  
+  #### Extract for Plotting 
+        #Plot and Extract for GGPLot2
+    time1 <- gg_ordiplot(ord_temporal_clr,sample_data(ps_temporal_clr)$timepoint,spiders = TRUE,ellipse = T,plot=F)
+    time1_plotdata<- time1$df_ord
+time1_plotdata$Group<-factor(time1_plotdata$Group,levels=c("PreTranslocation","PostTranslocation"))
+time1$df_spiders$Group<-factor(time1$df_spiders$Group,levels=c("PreTranslocation","PostTranslocation"))
+
+  #Plot Spiders  
+    frog_time_clr_plot1<-ggplot(time1_plotdata,aes(x=x,y=y)) + geom_segment(data=time1$df_spiders, aes(x=cntr.x, xend=x, y=cntr.y, yend=y, color=Group), show.legend = FALSE) 
+  #Plot Points  
+    frog_time_clr_plot2<- frog_time_clr_plot1 + geom_point(shape=21,color="white",aes(fill=Group),size=5) + theme_bw()
+  #Ellips
+    frog_time_clr_plot3<- frog_time_clr_plot2 + geom_path(data = time1$df_ellipse, aes(x=x, y=y, color=Group), show.legend = FALSE)
+ #Colour
+    frog_time_clr_plot4<- frog_time_clr_plot3 + labs(x="PC1 (35.27%)",y="PC2 (7.83%)",fill="Time") + plotopts + scale_fill_brewer(palette = "Set2") + scale_color_brewer(palette = "Set2") + theme(legend.position = "top") + guides(fill=guide_legend(nrow=2,byrow=TRUE))
+frog_time_clr_plot4
+
+ggsave2('CLR Beta Diversity Translocation.pdf',frog_time_clr_plot4,width=18,height=15,units="cm")
+
+  
+###### PERMANOVA
+  #Extract Matrix and Sample Data  
+          frog_temporal_clr_v<-vegan_otu(ps_temporal_clr)
+          frog_temporal_clr_s<-as(sample_data(ps_temporal_clr),"data.frame")
+          frog_temporal_clr_s$id<-factor(frog_temporal_clr_s$id)
+                    frog_temporal_clr_s$id_num<-as.numeric(frog_temporal_clr_s$id)
+
+  #Permutation Structure
+library("permute")
+h <- how(plots = Plots(strata = frog_temporal_clr_s$id, type = "none"),
+         nperm = 999,within = Within(type="series"))
+  # Run PERMANOVA
+          adonis2(frog_temporal_clr_v ~ timepoint + id, data=frog_temporal_clr_s,method="euclidean",permutations = h,by="mar")
+
+
+```
+
+### Procrustes Rotation
+```{r}
+
+#Make Sure Only Samples is Measured Twice Occur
+  temporal_idtab<-table(sample_data(ps_clean_temporal)$id)
+  temporal_idtab_rep2<-names(temporal_idtab)[temporal_idtab>1]
+  
+#Time Point 1
+      temporal_pretrans<-prune_samples(sample_data(ps_clean_temporal)$id %in% temporal_idtab_rep2 & sample_data(ps_clean_temporal)$timepoint=="PreTranslocation",ps_clean_temporal)
+      temporal_pretrans_clr<-microbiome::transform(temporal_pretrans, 'clr')
+      ord_temporal_pretrans_clr <- phyloseq::ordinate(temporal_pretrans_clr, "RDA")
+
+#Time Point 2
+      temporal_posttrans<-prune_samples(sample_data(ps_clean_temporal)$id %in% temporal_idtab_rep2 & sample_data(ps_clean_temporal)$timepoint=="PostTranslocation",ps_clean_temporal)
+      temporal_posttrans_clr<-microbiome::transform(temporal_posttrans, 'clr')
+      ord_temporal_posttrans_clr <- phyloseq::ordinate(temporal_posttrans_clr, "RDA")
+  
+## RUN PROCRUSTES
+      translocation_procrustes<-procrustes(X=ord_temporal_posttrans_clr,Y=ord_temporal_pretrans_clr,symmetric = T)
+      plot(translocation_procrustes)
+      protest(X=ord_temporal_posttrans_clr,Y=ord_temporal_pretrans_clr,scores="sites")
+```
+
+
+### Temporal Network
+
+```{r}
+library(NetCoMi)
+library(SpiecEasi)
+
+#Build Network
+    temporal_sample_net <- netConstruct(ps_temporal_clr,dataType = "counts",measure = "aitchison",
+                        measurePar = list(method = "mb",
+                        pulsar.params = list(rep.num = 10),
+                        symBetaMode = "ave"),
+                            normMethod = "clr",
+                            sparsMethod = "knn")
+    
+#Analyse and Plot
+  temporal_sample_net_an <- netAnalyze(temporal_sample_net, clustMethod = "cluster_fast_greedy")
+  
+
+######### NAIVE PLOT WITH STATISTICAL CLUSTERS
+  plot(temporal_sample_net_an,rmSingles = T)
+  
+######## VERSION TO MATCH ASV NETWORK - CLUSTERS ARE COLOURED, SAMPLE TYPE = SHAPE 
+  
+#Features to Show Sample Type (ALSO USED BELOW)
+  featvec_temp<-frog_temporal_clr_s$timepoint
+  names(featvec_temp)<-frog_temporal_clr_s$sample
+  
+#Site Labels
+  id_labs<-as.character(frog_temporal_clr_s$id)
+  names(id_labs)<-frog_temporal_clr_s$sample
+  
+png('Ranoides Temporal Network ClusterCol.png',res=600,width=40,height=30,units="cm")  
+   plot(temporal_sample_net_an,rmSingles = T,
+    repulsion=1.2,
+     labelScale = FALSE,
+     cexLabels = 3,
+     cexNodes = 1,layout="spring",nodeSize = "fix",
+     featVecShape=featvec_temp,nodeColor = "cluster",labels=id_labs,colorVec = brewer.pal(6,"Dark2")[1:3])
+legend("topright", title = "",legend=c("PreTranslocation","PostTranslocation"), bty = "n",pch=c(15,16),xpd=T,cex = 3, pt.cex = 5,y.intersp=1,x.intersp = 1,col="gray") 
+   dev.off() 
+
+```
+
+###Heatmap 
+
+```{r}
+
+ #Subset to Most 50 abundant OTUs
+     ps_temporal_top50 <- prune_taxa(names(sort(taxa_sums(ps_clean_temporal),TRUE)[1:50]), ps_clean_temporal)
+   
+## Only Repeat Sampled Individuals 
+    repeat_frogs<-table(sample_data(ps_temporal_top50)$id)
+    
+    ps_temporal_top50_repeatsampled <- prune_samples(sample_data(ps_temporal_top50)$id %in% names(repeat_frogs)[repeat_frogs==2], ps_temporal_top50)
+
+  
+
+    #Generate Metadata for Plotting Colours (SITE ID)
+      id_data<-data.frame(ID=factor(sample_data(ps_temporal_top50_repeatsampled)$id),Timepoint=sample_data(ps_temporal_top50_repeatsampled)$timepoint)
+      rownames(id_data)<-rownames(sample_data(ps_temporal_top50_repeatsampled))
+    #Strip Out OTU_Table
+       ps_rare_top50_temporal_otu<-otu_table(rarefy_even_depth(ps_temporal_top50_repeatsampled))
+    
+    #Order By Sample ID 
+       sampids<-sample_data(ps_temporal_top50_repeatsampled)$sample
+       sampids_sequence<-rep(1,length(sampids))
+       sampids_sequence[grep("_2",sampids)]<-2
+      
+       ps_rare_top50_temporal_otu_ordered<-ps_rare_top50_temporal_otu[, order(sample_data(ps_temporal_top50_repeatsampled)$id,sampids_sequence)]
+       
+       
+#Set2cols
+  set2<-brewer.pal(5,"Set2")
+       
+  ann_colors = list(
+    Timepoint = c(PreTranslocation=set2[1],PostTranslocation=set2[2]),
+    ID = palette36.colors(14))     
+       names(ann_colors[[2]])<-seq(14)
+       
+  #Rownames
+       rowlabels_genus<-data.frame(Genus=tax_table(ps_temporal_top50_repeatsampled)[,6],Family=tax_table(ps_temporal_top50_repeatsampled)[,5])
+       gen_na<-which(is.na(rowlabels_genus$Genus))
+       rowlabels_genus$Tax_combined<-rowlabels_genus$Genus
+       rowlabels_genus$Tax_combined[gen_na]<-paste0("[",rowlabels_genus$Family[gen_na],"]")
+       rownames(rowlabels_genus)<-rownames(ps_rare_top50_temporal_otu_ordered)
+       
+    #Plot Heatmap - With Hierarchical Clustering 
+      heatmap1<-pheatmap(ps_rare_top50_temporal_otu_ordered,cluster_cols = TRUE,scale="row",annotation_col = id_data,border_color = "white",annotation_colors = ann_colors,labels_row = rowlabels_genus[,3],show_colnames=F)
+
+```
+
+
+## Grid Plot Individual Level Temporal
+```{r}
+temp_grid1<-plot_grid(frog_temporal_richplot2,frog_time_clr_plot4,labels="AUTO",label_size = 20)
+temp_grid2<-plot_grid(temp_grid1,heatmap1[[4]],nrow=2,labels=c("","C"),label_size = 20)
+temp_grid2
+ggsave2('Individual Temporal Dynamics Grid.pdf',temp_grid2,width=30,height=30,units="cm")
+ggsave2('Individual Temporal Dynamics Grid.png',temp_grid2,width=30,height=30,units="cm")
+
+
+
+```
+
+# Temporal GLLVM 
+
+```{r}
+
+
+## OTUs Top 50
+  ranoides_temporal_genus<-aggregate_top_taxa2(ps_clean_temporal, "Genus", top = 50)
+  ranoides_temporal_clr_scaled <-microbiome::transform(ranoides_temporal_genus, transform = "clr")
+
+#Extract
+  temporal_ys <- data.frame(t(otu_table(ranoides_temporal_clr_scaled)))
+  names(temporal_ys) <-taxa_names(ranoides_temporal_clr_scaled)
+  
+#Predictors
+  temporal_Xs<-data.frame(sample_data(ranoides_temporal_clr_scaled)) %>% dplyr::select(timepoint,id)
+  temporal_Xs$timepoint<-factor(temporal_Xs$timepoint,levels=c("PreTranslocation","PostTranslocation"))
+
+## Model 
+  fit_temporal1 <- gllvm(temporal_ys, temporal_Xs, 
+                              num.lv = 2,
+                              formula = ~  timepoint,
+                              family = "gaussian",starting.val='zero',
+                              row.eff = "random",randomX=~id)
+  
+    coefplot(fit_temporal1)
+
+    
+#Estimates 
+  dftemp<-coef(fit_temporal1)
+  est_dftemp<-data.frame(dftemp$Intercept)
+  est_dftemp2<-data.frame(dftemp$Xcoef) 
+  est_dftemp3<-merge(est_dftemp, est_dftemp2, by = 0)
+  
+#Order genera
+  row.names(est_dftemp3)<-est_dftemp3$Row.names
+  est_dftemp3<-est_dftemp3[colnames(temporal_ys),]
+  names(est_dftemp3)[1]<- "Genus"
+  names(est_dftemp3)[2]<- "Intercept"
+  
+
+### COnfidence Intervals
+  confint_dftemp<-data.frame(confint(fit_temporal1))
+  
+###Strip Out Individual Datasets
+  ##TimePoint
+    posttrans_main<-grepl("^Xcoef.timepointPostTranslocation",rownames(confint_dftemp))
+    post_maindata<-cbind(est_dftemp3[,c("Genus","timepointPostTranslocation")],confint_dftemp[posttrans_main,])
+    colnames(post_maindata)<-c("Genus","Estimate","l95","u95")
+
+## Factor
+  post_maindata2<- post_maindata %>% arrange(Estimate,.by_group=T)
+  post_maindata2$Genus<-factor(post_maindata2$Genus,levels=unique(post_maindata2$Genus))
+
+#Significance  
+  post_maindata2$Sig<- !data.table::between(0, post_maindata2$l95, post_maindata2$u95)
+  sig_col<-moma.colors("Andri",3)[3]
+
+#Filter by Sig
+  post_maindata2_sig<-subset(post_maindata2,Sig==T)
+  
+### plot  
+  ranoides_temporal_gllvm_plot1<-ggplot(post_maindata2_sig,aes(x=Estimate,y=Genus)) + geom_errorbarh(aes(xmin=l95,xmax=u95),color="gray22",alpha=1,height=0.15) + geom_point(size=5,shape=21,fill="cornflowerblue",alpha=1) + theme_bw()
+  
+  ranoides_temporal_gllvm_plot2<- ranoides_temporal_gllvm_plot1 + theme_bw(base_size = 15) + geom_vline(xintercept=0,linetype="dashed") + scale_color_manual(values=c("gray40",sig_col)) + scale_fill_manual(values=c("white",sig_col)) + guides(fill="none",color="none") 
+  ranoides_temporal_gllvm_plot2
+  
+  ggsave2('Ranoides Temporal GLLVM Output.png',ranoides_temporal_gllvm_plot2,width=15,height=15,units="cm")
+  
+#### Correlations
+  cr1<-data.frame(getResidualCor(fit_reduced_scaled))#
+  
+  names(cr1)<-names(ys)
+  names(cr1)<-abbreviate(names(cr1), minlength = 15)
+  rownames(cr1)<-abbreviate(rownames(cr1), minlength = 15 )
+  
+  library(rstatix)
+  #devtools::install_github("kassambara/ggcorrplot")
+  library(ggcorrplot)
+  #install.packages("ggpubr")
+  library(ggpubr)
+  
+  cr2<-cor_pmat(cr1)
+  
+
+```
+
+
+# FUNCTIONAL ANALYSIS
+
+## TEMPORAL Prepare for MicFunPred
+Adapted from https://forum.qiime2.org/t/importing-dada2-and-phyloseq-objects-to-qiime-2/4683
+```{r}
+
+## Trim Newt1
+# ranoides_filter<-prune_taxa(taxa_sums(ps_clean_temporal)>200,ps_clean_temporal)
+# 
+# #Make Fasta File From Sequences
+# #remotes::install_github("alexpiper/seqateurs")
+# library(seqateurs)
+# ps_to_fasta(ranoides_filter)
+# 
+# #Export Feature Table 
+#   #library(biomformat);packageVersion("biomformat")
+#    otu<-(as(otu_table(ranoides_filter),"matrix")) # 't' to transform if taxa_are_rows=FALSE
+#   #Rename ASVs to Match FASTA above
+#    rownames(otu)<-paste0("ASV_",seq(nrow(otu)))
+#   #Fix Sample Names
+#    true_samples_ranoides_filter<-colnames(otu)
+#    colnames(otu)<-paste0("sample",seq(ncol(otu)))
+#   #Write File 
+#     # otu_biom<-make_biom(data=otu)
+#     # write_biom(otu_biom,"Newt1_filter.biom")
+#   # write.table(otu,'ranoides_temporal_filter.tsv',sep="\t",row.names=TRUE, col.names=TRUE, quote=FALSE)
+
+## Sample Data
+#ranoides_filter_samplemeta<-as(sample_data(ranoides_filter),"data.frame")#
+#write.csv(ranoides_filter_samplemeta,"Ranoides_Temporal_Filter_sample-metadata.csv")
+
+```
+
+## Predicted Function Analysis
+
+```{r}
+#KEGG pathway abundances
+  predfunc<-read.table('Ranoides Functional Analysis/KEGG_pathways_MinPath_prunned.tsv',sep="\t",header=T)
+#Sample Data
+  predfunc_samples<-read.csv('Ranoides Functional Analysis/Ranoides_Temporal_Filter_sample-metadata.csv')
+  
+#Ordinate
+  library(vegan)
+  predfunc_ord<-vegan::rda(t(predfunc[,-1]))
+  gg_ordiplot(predfunc_ord,predfunc_samples$timepoint)
+  
+  
+   #### Extract for Plotting 
+        #Plot and Extract for GGPLot2
+    timefunc1 <- gg_ordiplot(predfunc_ord,predfunc_samples$timepoint,spiders = TRUE,ellipse = T,plot=F)
+    timefunc1_plotdata<- timefunc1$df_ord
+    timefunc1_plotdata$Group<-factor(timefunc1_plotdata$Group,levels=c("PreTranslocation","PostTranslocation"))
+    timefunc1$df_spiders$Group<-factor(timefunc1$df_spiders$Group,levels=c("PreTranslocation","PostTranslocation"))
+
+  #Plot Spiders  
+    frog_timefunc_clr_plot1<-ggplot(timefunc1_plotdata,aes(x=x,y=y)) + geom_segment(data=timefunc1$df_spiders, aes(x=cntr.x, xend=x, y=cntr.y, yend=y, color=Group), show.legend = FALSE) 
+  #Plot Points  
+    frog_timefunc_clr_plot2<- frog_timefunc_clr_plot1 + geom_point(shape=21,color="white",aes(fill=Group),size=5) + theme_bw()
+  #Ellips
+    frog_timefunc_clr_plot3<- frog_timefunc_clr_plot2 + geom_path(data = timefunc1$df_ellipse, aes(x=x, y=y, color=Group), show.legend = FALSE)
+ #Colour
+    frog_timefunc_clr_plot4<- frog_timefunc_clr_plot3 + labs(x="NMDS1",y="NMDS2",fill="Time") + plotopts + scale_fill_brewer(palette = "Set2") + scale_color_brewer(palette = "Set2") + theme(legend.position = "top")
+frog_timefunc_clr_plot4
+
+ggsave2('Functional NMDS Translocation.pdf',frog_timefunc_clr_plot4,width=18,height=15,units="cm")
+```
+
+## Functional PERMANOVA
+```{r}
+
+#CLR Trasnform 
+  temporal_func_clr <-compositions::clr(t(predfunc[,-1]))
+  predfunc_samples$id<-factor(predfunc_samples$id)
+
+  #Permutation Structure
+library("permute")
+h_func <- how(plots = Plots(strata = predfunc_samples$id, type = "none"),
+         nperm = 999,within = Within(type="series"))
+  # Run PERMANOVA
+          adonis2(temporal_func_clr ~ timepoint + id, data=predfunc_samples,method="euclidean",permutations = h_func,by="mar")
+
+
+```
